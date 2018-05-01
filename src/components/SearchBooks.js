@@ -11,22 +11,20 @@ export class SearchBooks extends Component {
         searchedBooks: [],
     }
 
+    matchShelf = (book) => {
+        let shelf = this.props.books.filter(b => book.id === b.id)
+        return book.shelf = shelf.length ? shelf[0].shelf : 'none'
+    }
+
     updateQuery = query => {
         this.setState({ query: query })
         if (query) {
             BooksAPI.search(query).then(books => {
-                books.length ? this.setState({ searchedBooks: books }) :
-                    this.setState({ searchedBooks: [] });
-                if (this.state.searchedBooks !== []) {
-                    this.state.searchedBooks.map(searchedBook =>
-                        this.props.books.map(book => {
-                            if (book.id === searchedBook.id) {
-                                searchedBook.shelf = book.shelf
-                                return searchedBook.shelf
-                            } 
-                            return this.setState({ searchedBooks: books })
-                        })
-                    )
+                if (books.length > 0) {
+                    books.map(searchedBook => this.matchShelf(searchedBook));
+                    this.setState({ searchedBooks: books })
+                } else {
+                    this.setState({ searchedBooks: [] })
                 }
             })
         }
@@ -54,7 +52,7 @@ export class SearchBooks extends Component {
 
                     {this.state.query.length > 0 &&
                         <ol className="books-grid">
-                            {this.state.searchedBooks ? this.state.searchedBooks.map(book => <li key={book.id}><Book onShelfSwitch={this.props.onShelfSwitch} renderedBook={book} /></li>) : ''}
+                            {this.state.searchedBooks.length > 0 && this.state.searchedBooks.map(book => <li key={book.id}><Book onShelfSwitch={this.props.onShelfSwitch} renderedBook={book} /></li>)}
                         </ol>}
                 </div>
             </div>
